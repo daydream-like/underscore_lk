@@ -106,5 +106,130 @@
     _.prototype.value = function () {
         return this._wrapped;
     }
-    //
+    //提供一些方法方便其他情况使用
+    _.prototype.valueOf = _.prototype.toJSON = _.prototype.value;
+    _.prototype.toString = function () {
+        return ''+this._wrapped;
+    }
+    //对AMD支持的一些处理
+    if(typeof  define === 'function' && define.amd){
+        define('underscore',[],function () {
+            return _;
+        });
+     //判断是不是函数
+        if(typeof /./ != 'function' && typeof Int8Array != 'object'){
+            _.isFunction = function (obj) {
+                return typeof obj == 'function' || false ;
+            }
+        }
+        //检查其参数是否是无穷大。
+        _.isFinite = function (obj) {
+            return isFinite(obj) && !isNaN(parseFloat(obj));
+        }
+        //检查是不是boolean
+        _.isBoolean = function (obj) {
+            return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
+
+        }
+        //判读对象是否为空
+        _.isNull = function () {
+            return obj === null;
+        }
+        //判读是否为undefined
+        _.isUndefined = function (obj) {
+            return obj === void 0;
+        }
+        //检查对象中是否有给定的属性
+        _.has = function (obj,key) {
+            return obj !== null && hasOwnProperty.call(obj,key);
+        }
+        //解决冲突函数
+        _.noConflict = function () {
+            root._ = previousUnderscore;
+            return this ;
+        }
+        //返回与传入参数相等的值f(x) = x
+        _.identity = function (value) {
+            return value;
+        }
+        //创建一个函数，这个函数返回的值用来做_.constant的参数
+        _.constant = function (value) {
+            return function () {
+                return value ;
+            }
+        }
+        //返回undefined,不论传递给他是什么参数，用他做默认可选的回调参数
+        _.noop = function () {
+
+        }
+        //返回一个函数，这个函数可以返回任何传入对象的key属性
+        _.property = function (value) {
+            return function (obj) {
+                return obj === null ? void 0: obj[value];
+            }
+        }
+        //和_.property相反。需要一个对象，并返回一个函数,这个函数将返回一个提供的属性的值。
+        _.prototypeOf = function (obj) {
+           return obj === null?function(){}:function (key) {
+               return obj[key];
+           }
+        }
+        //类似于 extend, 但只复制自己的属性覆盖到目标对象。（愚人码头注：不包括继承过来的属性）
+        var createAssigner = function (keysFunc,undefinedOnly) {
+            return function (obj) {
+                var length = arguments.length;
+                if(length<2 || obj == null ){
+                    return obj ;
+                }
+                for(var index = 1 ;index <length ;index++){
+                    var source = arguments[index],
+                        keys = keysFunc(source),
+                        l = keys.length;
+                    for(var i = 0 ;i< l;i++){
+                        var key = keys[i];
+                        if(!undefinedOnly||obj[key] === void 0){
+                            obj[key] = source[key];
+                        }
+                    }
+                }
+                return obj;
+            }
+        }
+        //枚举bug ie<9
+        var hasEnumBug = !{toString:null}.propertyIsEnumerable('toString');
+        var noEnumerableProps = ['valueOf','isPrototype','toString','prototypeIsEnumerable','hasOwnProperty','toLocaleString'];
+        function collectNonEnumProps(obj,keys) {
+            var noEnumIdx = noEnumerableProps.length;
+            var constructor = obj.constructor;
+            var proto = (_.isFunction(constructor)&& constructor.prototype)||ObjectProto;
+            //
+            var prop = 'constructor';
+            if(_.has(obj,proto)&&!_.contains(keys,prop)){
+             keys.push(prop);
+            }
+            while(noEnumIdx--){
+                prop = noEnumerableProps[noEnumIdx];
+                if(prop in obj && obj[prop] !== proto[prop] && !_.contains(keys,prop)){
+                    keys.push(prop);
+                }
+            }
+        }
+        //检索object拥有的和继承的所有属性的名称。
+        _.allKeys = function (obj) {
+            if(!_.isObject(obj)){
+                return [];
+            }
+            var keys = [];
+            for(var key in obj ){
+                keys.push(key);
+            }
+            //IE<9
+            if(hasEnumBug){
+
+            }
+        }
+        _.extendOwn = function () {
+            
+        }
+    }
 }).call(this);
