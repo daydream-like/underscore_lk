@@ -215,6 +215,13 @@
             }
         }
         //检索object拥有的和继承的所有属性的名称。
+        /** function Stooge(name) {
+         this.name = name;
+         }
+         Stooge.prototype.silly = true;
+         _.allKeys(new Stooge("Moe"));
+         => ["name", "silly"]
+        * */
         _.allKeys = function (obj) {
             if(!_.isObject(obj)){
                 return [];
@@ -231,5 +238,37 @@
         _.extendOwn = function () {
             
         }
+        //创建 一个浅复制（浅拷贝）的克隆object。任何嵌套的对象或数组都通过引用拷贝，不会复制。
+        _.clone = function (obj) {
+            if(!_.isObject(obj)){
+                return ;
+            }
+            return _.isArray(obj) ? obj.slice():_.extend({},obj);
+        }
+        //拦截链式调用当中的结果
+        _.tap = function (obj,interceptor) {
+            interceptor(obj);
+            return obj;
+        }
+        //获取给定的键值对是否包含在对象中
+        _.isMatch = function (objects,attrs) {
+           var keys = _.keys(objects),length = keys.length;
+           if(objects == null){
+               return !length;
+           }
+           var obj = Object(objects);
+           for(var i=0;i<length;i++){
+               var key = keys[i];
+               if(obj[key] !== attrs[key] || !(key in obj)){
+                   return false ;
+               }
+           }
+           return true;
+        }
+        
+        //复制source对象中的所有属性覆盖到destination对象上，
+        // 并且返回 destination 对象. 复制是按顺序的, 
+        // 所以后面的对象属性会把前面的对象属性覆盖掉(如果有重复).
+        _.extend =  createAssigner(_.allKeys);
     }
 }).call(this);
